@@ -1,7 +1,9 @@
 package logic
 
 import (
+	"book/user/api/model"
 	"context"
+	"strconv"
 
 	"book/user/api/internal/svc"
 	"book/user/api/internal/types"
@@ -23,8 +25,25 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) UserInfoL
 	}
 }
 
-func (l *UserInfoLogic) UserInfo() (*types.UserReply, error) {
-	// todo: add your logic here and delete this line
+func (l *UserInfoLogic) UserInfo(userId string) (*types.UserReply, error) {
+	userInt, err := strconv.ParseInt(userId, 10, 64)
+	if err != nil {
+		return nil, err
+	}
 
-	return &types.UserReply{}, nil
+	userInfo, err := l.svcCtx.UserModel.FindOne(userInt)
+	switch err {
+	case nil:
+		return &types.UserReply{
+			Id:       userInfo.Id,
+			Username: userInfo.Name,
+			Mobile:   userInfo.Mobile,
+			Nickname: userInfo.Nickname,
+			Gender:   userInfo.Gender,
+		}, nil
+	case model.ErrNotFound:
+		return nil, errorUserNotFound
+	default:
+		return nil, err
+	}
 }

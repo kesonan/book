@@ -34,8 +34,8 @@ func (l *LoginLogic) Login(req types.LoginReq) (*types.UserReply, error) {
 			return nil, errorIncorrectPassword
 		}
 		now := time.Now().Unix()
-		accessExpire := l.svcCtx.Config.Jwt.Expire
-		jwtToken, err := l.getJwtToken(l.svcCtx.Config.Jwt.SecretKey, now, accessExpire)
+		accessExpire := l.svcCtx.Config.Auth.Expire
+		jwtToken, err := l.getJwtToken(l.svcCtx.Config.Auth.AccessSecret, now, accessExpire, userInfo.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -59,10 +59,11 @@ func (l *LoginLogic) Login(req types.LoginReq) (*types.UserReply, error) {
 	}
 }
 
-func (l *LoginLogic) getJwtToken(secretKey string, iat, seconds int64) (string, error) {
+func (l *LoginLogic) getJwtToken(secretKey string, iat, seconds, userId int64) (string, error) {
 	claims := make(jwt.MapClaims)
 	claims["exp"] = iat + seconds
 	claims["iat"] = iat
+	claims["userId"] = userId
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims = claims
 	return token.SignedString([]byte(secretKey))

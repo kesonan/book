@@ -9,4 +9,5 @@ var (
 	errorDuplicateMobile    = shared.NewDefaultError("手机号已经被占用")
 	errorUsernameUnRegister = shared.NewDefaultError("用户为注册")
 	errorIncorrectPassword  = shared.NewDefaultError("用户密码错误")
+	errorUserNotFound       = shared.NewDefaultError("用户不存在")
 )

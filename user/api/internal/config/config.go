@@ -9,8 +9,8 @@ type Config struct {
 	Mysql struct {
 		DataSource string
 	}
-	Jwt struct {
-		SecretKey string
-		Expire    int64
+	Auth struct {
+		AccessSecret string
+		Expire       int64
 	}
 }
