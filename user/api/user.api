@@ -1,0 +1,52 @@
+info(
+    title: "user api"
+    desc: "用户系统"
+    author: "anqiansong"
+    email: "anqiansong@xiaoheiban.cn"
+)
+
+type RegisterReq struct {
+	Username string `json:"username"`
+	Mobile   string `json:"mobile"`
+	Password string `json:"password"`
+}
+
+type LoginReq struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type UserReply struct {
+	Id       int64  `json:"id"`
+	Username string `json:"username"`
+	Mobile   string `json:"mobile"`
+	Nickname string `json:"nickname"`
+	Gender   string `json:"gender"`
+	JwtToken
+}
+
+type JwtToken struct {
+	AccessToken  string `json:"accessToken"`
+	AccessExpire int64  `json:"accessExpire"`
+	RefreshAfter int64  `json:"refreshAfter"`
+}
+
+service user-api {
+    @handler ping
+    post /user/ping ()
+
+    @handler register
+    post /user/register (RegisterReq)
+
+    @handler login
+    post /user/login (LoginReq) returns (UserReply)
+}
+
+@server(
+	jwt: Auth
+)
+service user-api {
+	@handler userInfo
+	get /user/info () returns (UserReply)
+}
+
