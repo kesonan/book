@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package library;
+
+message FindBookReq {
+  // 书籍名称
+  string name = 1;
+}
+
+message FindBookReply {
+  string no = 1;
+  string name = 2;
+  string author = 3;
+  string publishFate = 4;
+}
+
+service library {
+  // 通过书籍名称查找书籍
+  rpc FindBookByName(FindBookReq) returns (FindBookReply);
+}

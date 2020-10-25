@@ -1,0 +1,8 @@
+Name: borrow.rpc
+ListenOn: 127.0.0.1:9001
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: borrow.rpc
+Mysql:
+  DataSource: root:AQS910422@tcp(127.0.0.1:3306)/gozero?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai

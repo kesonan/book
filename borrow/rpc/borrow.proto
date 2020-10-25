@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package borrow;
+
+message BorrowReq {
+  // 书籍号
+  string bookNo = 1;
+  // 借书人
+  int64 userId = 2;
+  // 预计还书时间: 时间戳（秒）
+  int64 returnPlanDate = 3;
+}
+
+message BaseReply {
+}
+
+message ReturnReq{
+  // 书籍号
+  string bookNo = 1;
+  // 借书人
+  int64 userId = 2;
+}
+
+
+service Borrow {
+  // 借书
+  rpc Borrow(BorrowReq) returns(BaseReply);
+  // 还书
+  rpc Return(ReturnReq)returns(BaseReply);
+}
