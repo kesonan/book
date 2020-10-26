@@ -1,0 +1,18 @@
+Name: borrow-api
+Host: 0.0.0.0
+Port: 9999
+Mysql:
+  DataSource: root:AQS910422@tcp(127.0.0.1:3306)/gozero?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+Auth:
+  AccessSecret: ad879037-c7a4-4063-9236-6bfc35d54b7d
+  AccessExpire: 86400
+LibraryRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: library.rpc
+UserRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: user.rpc

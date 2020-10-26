@@ -1,0 +1,28 @@
+info(
+    title: "图书借阅系统api"
+    desc: "图书借阅系统api"
+    author: "keson"
+    email: "keson@xiaoheiban.cn"
+    version: "v1.0"
+)
+
+type BorrowReq struct {
+	BookName   string `json:"bookName"`
+	ReturnPlan int64  `json:"returnPlan"`
+}
+
+type ReturnReq struct {
+	BookName string `json:"bookName"`
+}
+
+@server(
+    jwt: Auth
+)
+service borrow-api {
+    @handler borrow
+    post /borrow/do (BorrowReq)
+
+    @handler return
+    post /borrow/return (ReturnReq)
+}
+

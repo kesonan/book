@@ -3,7 +3,7 @@ package logic
 import (
 	"book/user/api/internal/svc"
 	"book/user/api/internal/types"
-	"book/user/api/model"
+	"book/user/model"
 	"context"
 	"time"
 
@@ -34,7 +34,7 @@ func (l *LoginLogic) Login(req types.LoginReq) (*types.UserReply, error) {
 			return nil, errorIncorrectPassword
 		}
 		now := time.Now().Unix()
-		accessExpire := l.svcCtx.Config.Auth.Expire
+		accessExpire := l.svcCtx.Config.Auth.AccessExpire
 		jwtToken, err := l.getJwtToken(l.svcCtx.Config.Auth.AccessSecret, now, accessExpire, userInfo.Id)
 		if err != nil {
 			return nil, err

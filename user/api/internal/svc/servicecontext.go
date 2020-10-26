@@ -3,7 +3,7 @@ package svc
 import (
 	"book/user/api/internal/config"
 	"book/user/api/internal/middleware"
-	"book/user/api/model"
+	"book/user/model"
 
 	"github.com/tal-tech/go-zero/core/stores/sqlx"
 	"github.com/tal-tech/go-zero/rest"

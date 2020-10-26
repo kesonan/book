@@ -1,51 +1,50 @@
 package shared
 
+import (
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
 const (
-	defaultNotFoundCode  = 4004
-	defaultGRPCErrorCode = 1001
+	defaultNotFoundCode     = 4004
+	defaultGRPCErrorCode    = 1001
+	defaultErrorPlaceholder = ""
 )
 
-type (
-	GRPCError struct {
-		Code int    `json:"code"`
-		Msg  string `json:"msg"`
-	}
-)
-
-func NewGRPCError(code int, msg string) *GRPCError {
-	return &GRPCError{Code: code, Msg: msg}
+func NewGRPCCodeError(code int, msg string) error {
+	st := status.New(codes.Code(code), msg)
+	return st.Err()
 }
 
 func NewGRPCNotFound() error {
-	return NewGRPCError(defaultNotFoundCode, "")
+	st := status.New(codes.Code(defaultNotFoundCode), defaultErrorPlaceholder)
+	return st.Err()
 }
 
 func NewDefaultGRPCError(msg string) error {
-	return NewGRPCError(defaultGRPCErrorCode, msg)
+	return NewGRPCCodeError(defaultGRPCErrorCode, msg)
 }
 
 func NewGRPCErrorFromError(e error) error {
 	return NewDefaultGRPCError(e.Error())
 }
 
-func (e *GRPCError) Error() string {
-	return e.Msg
-}
-
 func FromGRPC(e error) error {
-	switch v := e.(type) {
-	case *GRPCError:
-		return NewCodeError(v.Code, v.Msg)
+	st := status.Convert(e)
+	switch st.Code() {
+	case codes.OK:
+		return st.Err()
 	default:
-		return NewDefaultError(e.Error())
+		return NewCodeError(int(st.Code()), st.Message())
 	}
 }
 
 func IsGRPCNotFound(e error) bool {
-	switch v := e.(type) {
-	case *GRPCError:
-		return v.Code == defaultNotFoundCode
-	default:
+	st := status.Convert(e)
+	switch st.Code() {
+	case codes.OK:
 		return false
+	default:
+		return int(st.Code()) == defaultNotFoundCode
 	}
 }

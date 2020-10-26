@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"book/user/api/model"
+	"book/user/model"
 	"context"
 	"strconv"
 

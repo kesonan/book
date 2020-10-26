@@ -3,7 +3,7 @@ package logic
 import (
 	"book/user/api/internal/svc"
 	"book/user/api/internal/types"
-	"book/user/api/model"
+	"book/user/model"
 	"context"
 
 	"github.com/tal-tech/go-zero/core/logx"

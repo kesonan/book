@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package user;
+
+message UserExistReq {
+  int64 id = 1;
+}
+
+message UserExistReply {
+  bool exists = 1;
+}
+
+service user {
+  // 判断用户是否存在
+  rpc isUserExist(UserExistReq) returns (UserExistReply);
+}

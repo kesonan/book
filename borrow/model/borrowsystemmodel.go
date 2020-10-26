@@ -36,7 +36,7 @@ type (
 		UserId         int64     `db:"user_id"`          // 借书人
 		Status         int64     `db:"status"`           // 书籍状态，0-未归还，1-已归还
 		ReturnPlanDate time.Time `db:"return_plan_date"` // 预计还书时间
-		ReturnDate     time.Time `db:"return_date"`      // 实际还书时间
+		ReturnDate     int64     `db:"return_date"`      // 实际还书时间
 		CreateTime     time.Time `db:"create_time"`
 		UpdateTime     time.Time `db:"update_time"`
 	}
@@ -69,10 +69,10 @@ func (m *BorrowSystemModel) FindOne(id int64) (*BorrowSystem, error) {
 	}
 }
 
-func (m *BorrowSystemModel) FindOneByBookNoAndStatus(bookNo string, status int) (*BorrowSystem, error) {
-	query := `select ` + borrowSystemRows + ` from ` + m.table + ` where book_no = ? and status = ? limit 1`
+func (m *BorrowSystemModel) FindOneByUserAndBookNo(userId int64, bookNo string) (*BorrowSystem, error) {
+	query := `select ` + borrowSystemRows + ` from ` + m.table + ` where user_id = ? and book_no = ? limit 1`
 	var resp BorrowSystem
-	err := m.conn.QueryRow(&resp, query, bookNo, status)
+	err := m.conn.QueryRow(&resp, query, userId, bookNo)
 	switch err {
 	case nil:
 		return &resp, nil
@@ -82,10 +82,11 @@ func (m *BorrowSystemModel) FindOneByBookNoAndStatus(bookNo string, status int) 
 		return nil, err
 	}
 }
-func (m *BorrowSystemModel) FindOneByBookNo(bookNo string) (*BorrowSystem, error) {
-	query := `select ` + borrowSystemRows + ` from ` + m.table + ` where book_no = ? limit 1`
+
+func (m *BorrowSystemModel) FindOneBookNo(bookNo string, status int) (*BorrowSystem, error) {
+	query := `select ` + borrowSystemRows + ` from ` + m.table + ` where book_no = ? and status = ? limit 1`
 	var resp BorrowSystem
-	err := m.conn.QueryRow(&resp, query, bookNo)
+	err := m.conn.QueryRow(&resp, query, bookNo, status)
 	switch err {
 	case nil:
 		return &resp, nil
