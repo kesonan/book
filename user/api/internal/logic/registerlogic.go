@@ -25,7 +25,7 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) RegisterL
 
 func (l *RegisterLogic) Register(req types.RegisterReq) error {
 	// 为了简单，这里只做一下简单的逻辑校验
-	_, err := l.svcCtx.UserModel.FindOneByMobile(req.Username)
+	_, err := l.svcCtx.UserModel.FindOneByName(req.Username)
 	if err == nil {
 		return errorDuplicateUsername
 	}
