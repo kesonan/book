@@ -10,7 +10,7 @@ import (
 	"book/user/rpc/internal/config"
 	"book/user/rpc/internal/server"
 	"book/user/rpc/internal/svc"
-	user "book/user/rpc/pb"
+	"book/user/rpc/user"
 
 	"github.com/tal-tech/go-zero/core/conf"
 	"github.com/tal-tech/go-zero/zrpc"
@@ -25,10 +25,10 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 	ctx := svc.NewServiceContext(c)
-	userSrv := server.NewUserServer(ctx)
+	srv := server.NewUserServer(ctx)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		user.RegisterUserServer(grpcServer, userSrv)
+		user.RegisterUserServer(grpcServer, srv)
 	})
 	defer s.Stop()
 

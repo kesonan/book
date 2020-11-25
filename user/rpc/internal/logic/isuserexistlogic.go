@@ -2,7 +2,7 @@ package logic
 
 import (
 	"book/user/model"
-	user "book/user/rpc/pb"
+	"book/user/rpc/user"
 	"context"
 
 	"book/user/rpc/internal/svc"
