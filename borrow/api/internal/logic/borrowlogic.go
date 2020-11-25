@@ -61,7 +61,7 @@ func (l *BorrowLogic) Borrow(userId string, req types.BorrowReq) error {
 		return err
 	}
 
-	_, err = l.svcCtx.BorrowSystemModel.FindOneBookNo(book.No, model.Borrowing)
+	_, err = l.svcCtx.BorrowSystemModel.FindOneByBookNo(book.No, model.Borrowing)
 	switch err {
 	case nil:
 		return errBookBorrowed

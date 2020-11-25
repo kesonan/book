@@ -3,7 +3,7 @@ package svc
 import (
 	"book/borrow/api/internal/config"
 	"book/borrow/model"
-	"book/library/rpc/library"
+	"book/library/rpc/libraryclient"
 	"book/user/rpc/user"
 
 	"github.com/tal-tech/go-zero/core/stores/sqlx"
@@ -12,15 +12,15 @@ import (
 
 type ServiceContext struct {
 	Config            config.Config
-	BorrowSystemModel *model.BorrowSystemModel
+	BorrowSystemModel model.BorrowSystemModel
 	UserRpc           user.User
-	LibraryRpc        library.Library
+	LibraryRpc        libraryclient.Library
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	conn := sqlx.NewMysql(c.Mysql.DataSource)
 	ur := user.NewUser(zrpc.MustNewClient(c.UserRpc))
-	lr := library.NewLibrary(zrpc.MustNewClient(c.LibraryRpc))
+	lr := libraryclient.NewLibrary(zrpc.MustNewClient(c.LibraryRpc))
 	return &ServiceContext{
 		Config:            c,
 		BorrowSystemModel: model.NewBorrowSystemModel(conn),

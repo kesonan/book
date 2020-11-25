@@ -8,7 +8,7 @@ import (
 
 	"book/library/rpc/internal/logic"
 	"book/library/rpc/internal/svc"
-	library "book/library/rpc/pb"
+	"book/library/rpc/library"
 )
 
 type LibraryServer struct {
@@ -21,7 +21,7 @@ func NewLibraryServer(svcCtx *svc.ServiceContext) *LibraryServer {
 	}
 }
 
-// 通过书籍名称查找书籍
+//  通过书籍名称查找书籍
 func (s *LibraryServer) FindBookByName(ctx context.Context, in *library.FindBookReq) (*library.FindBookReply, error) {
 	l := logic.NewFindBookByNameLogic(ctx, s.svcCtx)
 	return l.FindBookByName(in)

@@ -10,14 +10,14 @@ import (
 	"book/library/rpc/internal/config"
 	"book/library/rpc/internal/server"
 	"book/library/rpc/internal/svc"
-	library "book/library/rpc/pb"
+	"book/library/rpc/library"
 
 	"github.com/tal-tech/go-zero/core/conf"
 	"github.com/tal-tech/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
-var configFile = flag.String("f", "etc/library.yaml", "the config file")
+var configFile = flag.String("f", "etc/rpc.yaml", "the config file")
 
 func main() {
 	flag.Parse()
@@ -25,10 +25,10 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 	ctx := svc.NewServiceContext(c)
-	librarySrv := server.NewLibraryServer(ctx)
+	srv := server.NewLibraryServer(ctx)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		library.RegisterLibraryServer(grpcServer, librarySrv)
+		library.RegisterLibraryServer(grpcServer, srv)
 	})
 	defer s.Stop()
 

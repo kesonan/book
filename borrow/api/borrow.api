@@ -6,13 +6,13 @@ info(
     version: "v1.0"
 )
 
-type BorrowReq struct {
-	BookName   string `json:"bookName"`
-	ReturnPlan int64  `json:"returnPlan"`
+type BorrowReq {
+    BookName string `json:"bookName"`
+    ReturnPlan int64 `json:"returnPlan"`
 }
 
-type ReturnReq struct {
-	BookName string `json:"bookName"`
+type ReturnReq {
+    BookName string `json:"bookName"`
 }
 
 @server(

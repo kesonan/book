@@ -1,53 +1,52 @@
 info(
-    title: "user api"
-    desc: "用户系统"
-    author: "anqiansong"
-    email: "anqiansong@xiaoheiban.cn"
+	title: "user api"
+	desc: "用户系统"
+	author: "anqiansong"
+	email: "anqiansong@xiaoheiban.cn"
 )
 
-type RegisterReq struct {
+type RegisterReq {
 	Username string `json:"username"`
-	Mobile   string `json:"mobile"`
+	Mobile string `json:"mobile"`
 	Password string `json:"password"`
 }
 
-type LoginReq struct {
+type LoginReq {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-type UserReply struct {
-	Id       int64  `json:"id"`
+type UserReply {
+	Id int64 `json:"id"`
 	Username string `json:"username"`
-	Mobile   string `json:"mobile"`
+	Mobile string `json:"mobile"`
 	Nickname string `json:"nickname"`
-	Gender   string `json:"gender"`
+	Gender string `json:"gender"`
 	JwtToken
 }
 
-type JwtToken struct {
-	AccessToken  string `json:"accessToken,omitempty"`
-	AccessExpire int64  `json:"accessExpire,omitempty"`
-	RefreshAfter int64  `json:"refreshAfter,omitempty"`
+type JwtToken {
+	AccessToken string `json:"accessToken,omitempty"`
+	AccessExpire int64 `json:"accessExpire,omitempty"`
+	RefreshAfter int64 `json:"refreshAfter,omitempty"`
 }
 
 service user-api {
-    @handler ping
-    post /user/ping ()
-
-    @handler register
-    post /user/register (RegisterReq)
-
-    @handler login
-    post /user/login (LoginReq) returns (UserReply)
+	@handler ping
+	post /user/ping ()
+	
+	@handler register
+	post /user/register (RegisterReq)
+	
+	@handler login
+	post /user/login (LoginReq) returns (UserReply)
 }
 
 @server(
 	jwt: Auth
-	middleware: usercheck
+	middleware: Usercheck
 )
 service user-api {
 	@handler userInfo
 	get /user/info () returns (UserReply)
 }
-

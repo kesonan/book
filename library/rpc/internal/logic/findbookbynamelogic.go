@@ -1,12 +1,12 @@
 package logic
 
 import (
-	"book/library/rpc/model"
+	"book/library/model"
 	"book/shared"
 	"context"
 
 	"book/library/rpc/internal/svc"
-	library "book/library/rpc/pb"
+	"book/library/rpc/library"
 
 	"github.com/tal-tech/go-zero/core/logx"
 )

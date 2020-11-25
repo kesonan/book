@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -19,36 +20,44 @@ var (
 )
 
 type (
-	LibraryModel struct {
+	LibraryModel interface {
+		Insert(data Library) (sql.Result, error)
+		FindOne(id string) (*Library, error)
+		FindOneByName(name string) (*Library, error)
+		Update(data Library) error
+		Delete(id string) error
+	}
+
+	defaultLibraryModel struct {
 		conn  sqlx.SqlConn
 		table string
 	}
 
 	Library struct {
-		Id          string    `db:"id"`     // 书籍序列号
 		Name        string    `db:"name"`   // 书籍名称
 		Author      string    `db:"author"` // 书籍作者
-		PublishDate time.Time `db:"publish_date"`
 		CreateTime  time.Time `db:"create_time"`
+		PublishDate time.Time `db:"publish_date"`
 		UpdateTime  time.Time `db:"update_time"`
+		Id          string    `db:"id"` // 书籍序列号
 	}
 )
 
-func NewLibraryModel(conn sqlx.SqlConn) *LibraryModel {
-	return &LibraryModel{
+func NewLibraryModel(conn sqlx.SqlConn) LibraryModel {
+	return &defaultLibraryModel{
 		conn:  conn,
 		table: "library",
 	}
 }
 
-func (m *LibraryModel) Insert(data Library) (sql.Result, error) {
-	query := `insert into ` + m.table + ` (` + libraryRowsExpectAutoSet + `) values (?, ?, ?, ?)`
-	ret, err := m.conn.Exec(query, data.Id, data.Name, data.Author, data.PublishDate)
+func (m *defaultLibraryModel) Insert(data Library) (sql.Result, error) {
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?)", m.table, libraryRowsExpectAutoSet)
+	ret, err := m.conn.Exec(query, data.Name, data.Author, data.PublishDate, data.Id)
 	return ret, err
 }
 
-func (m *LibraryModel) FindOne(id string) (*Library, error) {
-	query := `select ` + libraryRows + ` from ` + m.table + ` where id = ? limit 1`
+func (m *defaultLibraryModel) FindOne(id string) (*Library, error) {
+	query := fmt.Sprintf("select %s from %s where id = ? limit 1", libraryRows, m.table)
 	var resp Library
 	err := m.conn.QueryRow(&resp, query, id)
 	switch err {
@@ -61,9 +70,9 @@ func (m *LibraryModel) FindOne(id string) (*Library, error) {
 	}
 }
 
-func (m *LibraryModel) FindOneByName(name string) (*Library, error) {
+func (m *defaultLibraryModel) FindOneByName(name string) (*Library, error) {
 	var resp Library
-	query := `select ` + libraryRows + ` from ` + m.table + ` where name = ? limit 1`
+	query := fmt.Sprintf("select %s from %s where name = ? limit 1", libraryRows, m.table)
 	err := m.conn.QueryRow(&resp, query, name)
 	switch err {
 	case nil:
@@ -75,14 +84,14 @@ func (m *LibraryModel) FindOneByName(name string) (*Library, error) {
 	}
 }
 
-func (m *LibraryModel) Update(data Library) (sql.Result, error) {
-	query := `update ` + m.table + ` set ` + libraryRowsWithPlaceHolder + ` where id = ?`
-	ret, err := m.conn.Exec(query, data.Name, data.Author, data.PublishDate, data.Id)
-	return ret, err
+func (m *defaultLibraryModel) Update(data Library) error {
+	query := fmt.Sprintf("update %s set %s where id = ?", m.table, libraryRowsWithPlaceHolder)
+	_, err := m.conn.Exec(query, data.Name, data.Author, data.PublishDate, data.Id)
+	return err
 }
 
-func (m *LibraryModel) Delete(id string) error {
-	query := `delete from ` + m.table + ` where id = ?`
+func (m *defaultLibraryModel) Delete(id string) error {
+	query := fmt.Sprintf("delete from %s where id = ?", m.table)
 	_, err := m.conn.Exec(query, id)
 	return err
 }

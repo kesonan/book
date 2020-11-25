@@ -11,7 +11,7 @@ import (
 
 type ServiceContext struct {
 	Config    config.Config
-	UserModel *model.UserModel
+	UserModel model.UserModel
 	UserCheck rest.Middleware
 }
 

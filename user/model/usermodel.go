@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -19,38 +20,47 @@ var (
 )
 
 type (
-	UserModel struct {
+	UserModel interface {
+		Insert(data User) (sql.Result, error)
+		FindOne(id int64) (*User, error)
+		FindOneByMobile(mobile string) (*User, error)
+		FindOneByName(name string) (*User, error)
+		Update(data User) error
+		Delete(id int64) error
+	}
+
+	defaultUserModel struct {
 		conn  sqlx.SqlConn
 		table string
 	}
 
 	User struct {
-		Id         int64     `db:"id"`
-		Name       string    `db:"name"`     // 用户名称
-		Password   string    `db:"password"` // 用户密码
-		Mobile     string    `db:"mobile"`   // 手机号
+		CreateTime time.Time `db:"create_time"`
 		Gender     string    `db:"gender"`   // 男｜女｜未公开
 		Nickname   string    `db:"nickname"` // 用户昵称
-		CreateTime time.Time `db:"create_time"`
+		Password   string    `db:"password"` // 用户密码
 		UpdateTime time.Time `db:"update_time"`
+		Id         int64     `db:"id"`
+		Mobile     string    `db:"mobile"` // 手机号
+		Name       string    `db:"name"`   // 用户名称
 	}
 )
 
-func NewUserModel(conn sqlx.SqlConn) *UserModel {
-	return &UserModel{
+func NewUserModel(conn sqlx.SqlConn) UserModel {
+	return &defaultUserModel{
 		conn:  conn,
 		table: "user",
 	}
 }
 
-func (m *UserModel) Insert(data User) (sql.Result, error) {
-	query := `insert into ` + m.table + ` (` + userRowsExpectAutoSet + `) values (?, ?, ?, ?, ?)`
-	ret, err := m.conn.Exec(query, data.Name, data.Password, data.Mobile, data.Gender, data.Nickname)
+func (m *defaultUserModel) Insert(data User) (sql.Result, error) {
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?)", m.table, userRowsExpectAutoSet)
+	ret, err := m.conn.Exec(query, data.Gender, data.Nickname, data.Password, data.Mobile, data.Name)
 	return ret, err
 }
 
-func (m *UserModel) FindOne(id int64) (*User, error) {
-	query := `select ` + userRows + ` from ` + m.table + ` where id = ? limit 1`
+func (m *defaultUserModel) FindOne(id int64) (*User, error) {
+	query := fmt.Sprintf("select %s from %s where id = ? limit 1", userRows, m.table)
 	var resp User
 	err := m.conn.QueryRow(&resp, query, id)
 	switch err {
@@ -63,23 +73,9 @@ func (m *UserModel) FindOne(id int64) (*User, error) {
 	}
 }
 
-func (m *UserModel) FindOneByName(name string) (*User, error) {
+func (m *defaultUserModel) FindOneByMobile(mobile string) (*User, error) {
 	var resp User
-	query := `select ` + userRows + ` from ` + m.table + ` where name = ? limit 1`
-	err := m.conn.QueryRow(&resp, query, name)
-	switch err {
-	case nil:
-		return &resp, nil
-	case sqlc.ErrNotFound:
-		return nil, ErrNotFound
-	default:
-		return nil, err
-	}
-}
-
-func (m *UserModel) FindOneByMobile(mobile string) (*User, error) {
-	var resp User
-	query := `select ` + userRows + ` from ` + m.table + ` where mobile = ? limit 1`
+	query := fmt.Sprintf("select %s from %s where mobile = ? limit 1", userRows, m.table)
 	err := m.conn.QueryRow(&resp, query, mobile)
 	switch err {
 	case nil:
@@ -91,14 +87,28 @@ func (m *UserModel) FindOneByMobile(mobile string) (*User, error) {
 	}
 }
 
-func (m *UserModel) Update(data User) (sql.Result, error) {
-	query := `update ` + m.table + ` set ` + userRowsWithPlaceHolder + ` where id = ?`
-	ret, err := m.conn.Exec(query, data.Name, data.Password, data.Mobile, data.Gender, data.Nickname, data.Id)
-	return ret, err
+func (m *defaultUserModel) FindOneByName(name string) (*User, error) {
+	var resp User
+	query := fmt.Sprintf("select %s from %s where name = ? limit 1", userRows, m.table)
+	err := m.conn.QueryRow(&resp, query, name)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
 }
 
-func (m *UserModel) Delete(id int64) error {
-	query := `delete from ` + m.table + ` where id = ?`
+func (m *defaultUserModel) Update(data User) error {
+	query := fmt.Sprintf("update %s set %s where id = ?", m.table, userRowsWithPlaceHolder)
+	_, err := m.conn.Exec(query, data.Gender, data.Nickname, data.Password, data.Mobile, data.Name, data.Id)
+	return err
+}
+
+func (m *defaultUserModel) Delete(id int64) error {
+	query := fmt.Sprintf("delete from %s where id = ?", m.table)
 	_, err := m.conn.Exec(query, id)
 	return err
 }

@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -25,38 +26,47 @@ var (
 )
 
 type (
-	BorrowSystemModel struct {
+	BorrowSystemModel interface {
+		Insert(data BorrowSystem) (sql.Result, error)
+		FindOne(id int64) (*BorrowSystem, error)
+		Update(data BorrowSystem) error
+		Delete(id int64) error
+		FindOneByUserAndBookNo(userId int64, bookNo string) (*BorrowSystem, error)
+		FindOneByBookNo(bookNo string, status int) (*BorrowSystem, error)
+	}
+
+	defaultBorrowSystemModel struct {
 		conn  sqlx.SqlConn
 		table string
 	}
 
 	BorrowSystem struct {
-		Id             int64     `db:"id"`
-		BookNo         string    `db:"book_no"`          // 书籍号
-		UserId         int64     `db:"user_id"`          // 借书人
-		Status         int64     `db:"status"`           // 书籍状态，0-未归还，1-已归还
-		ReturnPlanDate time.Time `db:"return_plan_date"` // 预计还书时间
-		ReturnDate     int64     `db:"return_date"`      // 实际还书时间
+		BookNo         string    `db:"book_no"` // 书籍号
+		UserId         int64     `db:"user_id"` // 借书人
 		CreateTime     time.Time `db:"create_time"`
+		ReturnDate     int64     `db:"return_date"`      // 实际还书时间
+		ReturnPlanDate time.Time `db:"return_plan_date"` // 预计还书时间
+		Status         int64     `db:"status"`           // 书籍状态，0-未归还，1-已归还
 		UpdateTime     time.Time `db:"update_time"`
+		Id             int64     `db:"id"`
 	}
 )
 
-func NewBorrowSystemModel(conn sqlx.SqlConn) *BorrowSystemModel {
-	return &BorrowSystemModel{
+func NewBorrowSystemModel(conn sqlx.SqlConn) BorrowSystemModel {
+	return &defaultBorrowSystemModel{
 		conn:  conn,
 		table: "borrow_system",
 	}
 }
 
-func (m *BorrowSystemModel) Insert(data BorrowSystem) (sql.Result, error) {
-	query := `insert into ` + m.table + ` (` + borrowSystemRowsExpectAutoSet + `) values (?, ?, ?, ?, ?)`
-	ret, err := m.conn.Exec(query, data.BookNo, data.UserId, data.Status, data.ReturnPlanDate, data.ReturnDate)
+func (m *defaultBorrowSystemModel) Insert(data BorrowSystem) (sql.Result, error) {
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?)", m.table, borrowSystemRowsExpectAutoSet)
+	ret, err := m.conn.Exec(query, data.BookNo, data.UserId, data.ReturnDate, data.ReturnPlanDate, data.Status)
 	return ret, err
 }
 
-func (m *BorrowSystemModel) FindOne(id int64) (*BorrowSystem, error) {
-	query := `select ` + borrowSystemRows + ` from ` + m.table + ` where id = ? limit 1`
+func (m *defaultBorrowSystemModel) FindOne(id int64) (*BorrowSystem, error) {
+	query := fmt.Sprintf("select %s from %s where id = ? limit 1", borrowSystemRows, m.table)
 	var resp BorrowSystem
 	err := m.conn.QueryRow(&resp, query, id)
 	switch err {
@@ -69,7 +79,19 @@ func (m *BorrowSystemModel) FindOne(id int64) (*BorrowSystem, error) {
 	}
 }
 
-func (m *BorrowSystemModel) FindOneByUserAndBookNo(userId int64, bookNo string) (*BorrowSystem, error) {
+func (m *defaultBorrowSystemModel) Update(data BorrowSystem) error {
+	query := fmt.Sprintf("update %s set %s where id = ?", m.table, borrowSystemRowsWithPlaceHolder)
+	_, err := m.conn.Exec(query, data.BookNo, data.UserId, data.ReturnDate, data.ReturnPlanDate, data.Status, data.Id)
+	return err
+}
+
+func (m *defaultBorrowSystemModel) Delete(id int64) error {
+	query := fmt.Sprintf("delete from %s where id = ?", m.table)
+	_, err := m.conn.Exec(query, id)
+	return err
+}
+
+func (m *defaultBorrowSystemModel) FindOneByUserAndBookNo(userId int64, bookNo string) (*BorrowSystem, error) {
 	query := `select ` + borrowSystemRows + ` from ` + m.table + ` where user_id = ? and book_no = ? limit 1`
 	var resp BorrowSystem
 	err := m.conn.QueryRow(&resp, query, userId, bookNo)
@@ -83,7 +105,7 @@ func (m *BorrowSystemModel) FindOneByUserAndBookNo(userId int64, bookNo string) 
 	}
 }
 
-func (m *BorrowSystemModel) FindOneBookNo(bookNo string, status int) (*BorrowSystem, error) {
+func (m *defaultBorrowSystemModel) FindOneByBookNo(bookNo string, status int) (*BorrowSystem, error) {
 	query := `select ` + borrowSystemRows + ` from ` + m.table + ` where book_no = ? and status = ? limit 1`
 	var resp BorrowSystem
 	err := m.conn.QueryRow(&resp, query, bookNo, status)
@@ -95,16 +117,4 @@ func (m *BorrowSystemModel) FindOneBookNo(bookNo string, status int) (*BorrowSys
 	default:
 		return nil, err
 	}
-}
-
-func (m *BorrowSystemModel) Update(data BorrowSystem) (sql.Result, error) {
-	query := `update ` + m.table + ` set ` + borrowSystemRowsWithPlaceHolder + ` where id = ?`
-	ret, err := m.conn.Exec(query, data.BookNo, data.UserId, data.Status, data.ReturnPlanDate, data.ReturnDate, data.Id)
-	return ret, err
-}
-
-func (m *BorrowSystemModel) Delete(id int64) error {
-	query := `delete from ` + m.table + ` where id = ?`
-	_, err := m.conn.Exec(query, id)
-	return err
 }

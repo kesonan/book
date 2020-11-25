@@ -50,7 +50,7 @@ func (l *ReturnLogic) Return(userId string, req types.ReturnReq) error {
 		}
 		info.ReturnDate = time.Now().Unix()
 		info.Status = model.Return
-		_, err = l.svcCtx.BorrowSystemModel.Update(*info)
+		err = l.svcCtx.BorrowSystemModel.Update(*info)
 		return err
 	case model.ErrNotFound:
 		return errUserReturn

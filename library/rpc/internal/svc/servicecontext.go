@@ -1,15 +1,15 @@
 package svc
 
 import (
+	"book/library/model"
 	"book/library/rpc/internal/config"
-	"book/library/rpc/model"
 
 	"github.com/tal-tech/go-zero/core/stores/sqlx"
 )
 
 type ServiceContext struct {
 	c            config.Config
-	LibraryModel *model.LibraryModel
+	LibraryModel model.LibraryModel
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
