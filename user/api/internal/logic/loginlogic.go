@@ -63,7 +63,7 @@ func (l *LoginLogic) getJwtToken(secretKey string, iat, seconds, userId int64) (
 	claims := make(jwt.MapClaims)
 	claims["exp"] = iat + seconds
 	claims["iat"] = iat
-	claims["userId"] = userId
+	claims["x-user-id"] = userId
 	token := jwt.New(jwt.SigningMethodHS256)
 	token.Claims = claims
 	return token.SignedString([]byte(secretKey))
